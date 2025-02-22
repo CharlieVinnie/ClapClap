@@ -1,5 +1,5 @@
 from enum import Enum
-from clap_core.hands import Hand
+from clap_core.player import Player
 
 class GameStatus(Enum):
     ONGOING = 0
@@ -9,10 +9,10 @@ class GameStatus(Enum):
 class Judge:
     
     def __init__(self) -> None:
-        pass
+        self.player = ( Player(), Player() )
 
-    def play(self, hand1: Hand, hand2: Hand):
+    def play(self, hand1: str, hand2: str):
         pass
 
     def gameStatus(self):
-        pass
+        return GameStatus.ONGOING

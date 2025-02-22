@@ -7,10 +7,10 @@ class TestJudge:
 
         judge = Judge()
 
-        judge.play( HANDS["气"], HANDS["气"] )
+        judge.play( "气", "气" )
 
         assert judge.gameStatus() == GameStatus.ONGOING
 
-        judge.play( HANDS["gi"], HANDS["气"] )
+        judge.play( "gi", "气" )
 
         assert judge.gameStatus() == GameStatus.FIRSTWIN
