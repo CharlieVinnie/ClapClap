@@ -1,4 +1,5 @@
 from clap_core.player import Player, IllegalHandError
+import re
 import pytest
 
 class TestHandsUsing:
@@ -10,7 +11,8 @@ class TestHandsUsing:
 
     def check_hand_cannot_be_used(self, hand: str, player: Player):
         assert not player.canPlay(hand)
-        with pytest.raises(IllegalHandError, match=f"Illegal hand:"):
+        with pytest.raises(IllegalHandError,
+                           match=re.escape(f"Illegal hand: {(player.qi,player.shield,player.spark,player.battery)} tried to play {hand}")):
             player.play(hand)
 
     def test_can_use_hands(self):
@@ -29,8 +31,11 @@ class TestHandsUsing:
         self.check_hand_can_be_used("黑洞", Player(qi=8), Player(qi=0))
         self.check_hand_cannot_be_used("黑洞", Player(qi=7, shield=8))
 
-        self.check_hand_can_be_used("小火", Player(shield=2), Player())
+        self.check_hand_can_be_used("小火", Player(shield=2), Player(spark=1))
         self.check_hand_cannot_be_used("小火", Player(qi=2, shield=1))
+
+        self.check_hand_can_be_used("闪电", Player(shield=4), Player(shield=1, battery=1))
+        self.check_hand_cannot_be_used("闪电", Player(qi=2, shield=1))
 
         self.check_hand_can_be_used("大火", Player(shield=4), Player())
         self.check_hand_can_be_used("大火", Player(shield=3, spark=2), Player(shield=3))
