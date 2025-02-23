@@ -6,11 +6,11 @@ class Player:
 
     uses_shield_dict = { "小火":2, "闪电":3, "大火":4, "Shining":6 }
 
-    def __init__(self) -> None:
-        self.qi = 0
-        self.shield = 0
-        self.spark = 0
-        self.battery = 0
+    def __init__(self, qi:int = 0, shield:int = 0, spark:int = 0, battery:int = 0) -> None:
+        self.qi = qi
+        self.shield = shield
+        self.spark = spark
+        self.battery = battery
     
     def canPlay(self, hand: str):
         if hand == "大火" and self.spark >= 2:

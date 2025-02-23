@@ -1,5 +1,4 @@
 from clap_core.judge import Judge, GameStatus
-from clap_core.hands import HANDS
 
 class TestJudge:
 
