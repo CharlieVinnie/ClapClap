@@ -13,3 +13,17 @@ class TestJudge:
         judge.play( "gi", "气" )
 
         assert judge.gameStatus() == GameStatus.FIRSTWIN
+
+    def test_more_complicated_game(self):
+
+        judge = Judge()
+
+        judge.play( "气", "气" )
+        
+        judge.play( "gi", "盾" )
+
+        judge.play( "气", "气" )
+
+        judge.play( "gi", "破" )
+
+        assert judge.gameStatus() == GameStatus.SECONDWIN
