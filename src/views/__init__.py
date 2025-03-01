@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class MyGuiObject:
 
     def __init__(self, name:str) -> None:
@@ -12,7 +15,7 @@ class MyImage(MyGuiObject):
 
 class MyButton(MyGuiObject):
 
-    def __init__(self, name: str, callback: function) -> None:
+    def __init__(self, name: str, callback: Callable[[],None]) -> None:
         super().__init__(name)
         self.callback = callback
 
