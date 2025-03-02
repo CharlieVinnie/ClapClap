@@ -1,5 +1,5 @@
-import views
+from views import gui
 
 
 def showEntranceBackground():
-    views.gui_object_list.append(views.MyImage("EntranceBackgroud"))
+    gui.gui_object_list.append(gui.MyImage("EntranceBackgroud"))
