@@ -2,12 +2,14 @@ from typing import Callable
 import pygame
 import pygame_gui
 import pygame_gui.ui_manager
+from . import buttons
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 manager = None
 screen = None
+
 
 def start(init_function: Callable[[],None]):
 
@@ -24,11 +26,6 @@ def start(init_function: Callable[[],None]):
     clock = pygame.time.Clock()
     running = True
 
-    button_rect = pygame.Rect((150, 120), (100, 50))
-    button = pygame_gui.elements.UIButton(relative_rect=button_rect,
-                                        text="Click Me",
-                                        manager=manager)
-
     while running:
 
         time_delta = clock.tick(60) / 1000.0
@@ -36,11 +33,10 @@ def start(init_function: Callable[[],None]):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element == button:
-                    print("Button clicked!")
 
             manager.process_events(event)
+
+            buttons.process_event(event)
         
         screen.fill((255,255,255))
 
