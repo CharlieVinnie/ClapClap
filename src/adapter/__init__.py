@@ -24,6 +24,11 @@ def start(init_function: Callable[[],None]):
     clock = pygame.time.Clock()
     running = True
 
+    button_rect = pygame.Rect((150, 120), (100, 50))
+    button = pygame_gui.elements.UIButton(relative_rect=button_rect,
+                                        text="Click Me",
+                                        manager=manager)
+
     while running:
 
         time_delta = clock.tick(60) / 1000.0
@@ -31,6 +36,9 @@ def start(init_function: Callable[[],None]):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element == button:
+                    print("Button clicked!")
 
             manager.process_events(event)
         
