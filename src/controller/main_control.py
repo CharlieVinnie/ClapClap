@@ -8,12 +8,14 @@ def startDummy():
 
 
 def gameEntrance():
+    def init():
 
-    adapter.start()
+        views.images.showEntranceBackground()
 
-    views.images.showEntranceBackground()
+        views.buttons.createStartDummyButton(startDummy)
 
-    views.buttons.createStartDummyButton(startDummy)
+    adapter.start(init)
+
 
 if __name__ == "__main__":
     gameEntrance()
