@@ -7,9 +7,9 @@ from pygame.event import Event
 button_callback_map: dict[UIButton, Callable[[],None]] = {}
 
 
-def create_button(callback: Callable[[],None], **kwargs: Any):
+def create_button(callback: Callable[[],None], config: dict[str, Any]):
 
-    button = UIButton(manager=adapter.manager, **kwargs)
+    button = UIButton(manager=adapter.manager, **config)
 
     button_callback_map[button] = callback
 

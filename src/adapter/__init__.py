@@ -7,11 +7,12 @@ from . import buttons
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-manager = None
+manager: pygame_gui.UIManager|None = None
 screen = None
 
 
 def start(init_function: Callable[[],None]):
+    global manager, screen
 
     pygame.init()
 
@@ -37,12 +38,9 @@ def start(init_function: Callable[[],None]):
             manager.process_events(event)
 
             buttons.process_event(event)
-        
-        screen.fill((255,255,255))
-
-        pygame.draw.circle(screen, (0,0,255), (SCREEN_WIDTH//2,SCREEN_HEIGHT//2), 50)
 
         manager.update(time_delta)
+        screen.fill((0,0,0))
         manager.draw_ui(screen)
 
         pygame.display.flip()
