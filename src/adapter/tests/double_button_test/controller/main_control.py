@@ -26,6 +26,8 @@ def gameEntrance():
 
         views.buttons.createStartDummyButton(toggleOther)
 
+    logger.info("hi there")
+
     adapter.start(init)
 
 
