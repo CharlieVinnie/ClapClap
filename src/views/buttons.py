@@ -1,6 +1,7 @@
 import adapter
 import adapter.buttons
 from typing import Callable
+import typing
 import pygame
 from pygame_gui.core import UIContainer
 
@@ -8,7 +9,8 @@ class ButtonNotFoundError(Exception): pass
 
 def findElement(name: str):
     try:
-        container: UIContainer = adapter.manager.get_root_container() # type: ignore
+        assert adapter.manager
+        container = typing.cast( UIContainer, adapter.manager.get_root_container() )
         element = next( elem for elem in container.elements if elem.get_object_ids()[0] == name )
         return element
     except StopIteration:
