@@ -1,5 +1,4 @@
 import threading
-import pygame
 import pytest
 from typing import Callable
 import typing
@@ -12,5 +11,3 @@ def pygame_gui_testing(request: pytest.FixtureRequest):
     main_thread.start()
 
     yield main_thread
-
-    pygame.event.post(pygame.event.Event(pygame.QUIT))
