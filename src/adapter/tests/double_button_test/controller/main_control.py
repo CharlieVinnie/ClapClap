@@ -2,6 +2,9 @@ import adapter
 # from ..... import adapter
 import views.buttons
 import views.images
+import logging
+
+logger = logging.getLogger()
 
 other_on = False
 
@@ -12,7 +15,7 @@ def toggleOther():
         views.buttons.removeOtherButton()
         other_on = False
     else:
-        views.buttons.createOtherButton(lambda: print("hello"))
+        views.buttons.createOtherButton(lambda: logger.info("hello"))
         other_on = True
 
 
