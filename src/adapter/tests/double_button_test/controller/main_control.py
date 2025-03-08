@@ -1,6 +1,5 @@
 from .... import main
-import views.buttons
-import views.images
+from ..views import buttons, images
 import logging
 
 logger = logging.getLogger()
@@ -11,19 +10,21 @@ def toggleOther():
     global other_on
 
     if other_on:
-        views.buttons.removeOtherButton()
+        buttons.removeOtherButton()
         other_on = False
     else:
-        views.buttons.createOtherButton(lambda: logger.info("hello"))
+        buttons.createOtherButton(lambda: logger.info("hello"))
         other_on = True
 
 
 def gameEntrance():
     def init():
 
-        views.images.showEntranceBackground()
+        images.showEntranceBackground()
 
-        views.buttons.createStartDummyButton(toggleOther)
+        buttons.createStartDummyButton(toggleOther)
+        import adapter.buttons
+        print(len(adapter.buttons.button_callback_map))
 
     print("hey there")
 

@@ -32,7 +32,6 @@ def start(init_function: Callable[[],None]):
         finally:
             started_condition.notify_all()
 
-
     clock = pygame.time.Clock()
     running = True
 
