@@ -8,24 +8,19 @@ button_callback_map: dict[UIButton, Callable[[],None]] = {}
 
 
 def create_button(callback: Callable[[],None], config: dict[str, Any]):
-    print("create")
-
     button = UIButton(manager=main.manager, **config)
 
     button_callback_map[button] = callback
 
-    print(len(button_callback_map))
+
+def remove_button(button: UIButton):
+    del button_callback_map[button]
 
 
 def process_event(event: Event):
 
     if event.type == pygame_gui.UI_BUTTON_PRESSED:
-        print("I see:", button_callback_map)
-
         button = event.ui_element
-
-        print(button)
-        print(button_callback_map)
 
         if button in button_callback_map.keys():
             button_callback_map[button]()

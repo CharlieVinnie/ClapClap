@@ -23,10 +23,6 @@ def gameEntrance():
         images.showEntranceBackground()
 
         buttons.createStartDummyButton(toggleOther)
-        import adapter.buttons
-        print(len(adapter.buttons.button_callback_map))
-
-    print("hey there")
 
     main.start(init)
 

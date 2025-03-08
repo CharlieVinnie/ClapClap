@@ -9,15 +9,11 @@ import pygame
 def pygame_gui_testing(request: pytest.FixtureRequest):
     entrance = typing.cast(Callable[[],None], request.param)
 
-    print(entrance)
-
     main_thread = threading.Thread(target=entrance)
     main_thread.start()
 
     with main.started_condition:
         main.started_condition.wait_for(lambda: main.manager is not None)
-
-    print("hello")
 
     yield main_thread
 
