@@ -1,5 +1,4 @@
-import adapter
-# from ..... import adapter
+from .... import main
 import views.buttons
 import views.images
 import logging
@@ -28,7 +27,7 @@ def gameEntrance():
 
     print("hey there")
 
-    adapter.start(init)
+    main.start(init)
 
 
 if __name__ == "__main__":

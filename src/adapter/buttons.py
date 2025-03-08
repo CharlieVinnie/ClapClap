@@ -1,4 +1,4 @@
-import adapter
+from . import main
 from typing import Any, Callable
 import pygame_gui
 from pygame_gui.elements import UIButton 
@@ -9,7 +9,7 @@ button_callback_map: dict[UIButton, Callable[[],None]] = {}
 
 def create_button(callback: Callable[[],None], config: dict[str, Any]):
 
-    button = UIButton(manager=adapter.manager, **config)
+    button = UIButton(manager=main.manager, **config)
 
     button_callback_map[button] = callback
 

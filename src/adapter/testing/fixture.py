@@ -2,7 +2,7 @@ import threading
 import pytest
 from typing import Callable
 import typing
-from .. import manager, started_condition
+from .. import main
 import pygame
 
 @pytest.fixture
@@ -14,8 +14,8 @@ def pygame_gui_testing(request: pytest.FixtureRequest):
     main_thread = threading.Thread(target=entrance)
     main_thread.start()
 
-    with started_condition:
-        started_condition.wait_for(lambda: manager is not None)
+    with main.started_condition:
+        main.started_condition.wait_for(lambda: main.manager is not None)
 
     print("hello")
 
