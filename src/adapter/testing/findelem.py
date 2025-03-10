@@ -1,6 +1,6 @@
+from .. import main
 from pygame_gui.core import UIContainer
 import typing
-from .. import main
 
 class ButtonNotFoundError(Exception): pass
 

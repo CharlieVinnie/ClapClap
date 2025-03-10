@@ -1,4 +1,4 @@
-from .... import main
+import adapter
 from ..views import buttons, images
 import logging
 
@@ -24,7 +24,7 @@ def gameEntrance():
 
         buttons.createStartDummyButton(toggleOther)
 
-    main.start(init)
+    adapter.start(init)
 
 
 if __name__ == "__main__":

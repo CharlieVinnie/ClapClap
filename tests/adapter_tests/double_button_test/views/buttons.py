@@ -1,4 +1,4 @@
-from .... import main, buttons
+import adapter
 import typing
 from typing import Callable
 import pygame
@@ -9,8 +9,8 @@ class ButtonNotFoundError(Exception): pass
 
 def findElement(name: str):
     try:
-        assert main.manager is not None
-        container = typing.cast(UIContainer, main.manager.get_root_container())
+        assert adapter.manager is not None
+        container = typing.cast(UIContainer, adapter.manager.get_root_container())
         element = next( elem for elem in container.elements if elem.get_object_ids()[0] == name )
         return element
     except StopIteration:
@@ -18,7 +18,7 @@ def findElement(name: str):
 
 def createStartDummyButton(callback: Callable[[],None]):
 
-    buttons.create_button(callback,
+    adapter.create_button(callback,
                                   config=
                                   { "object_id": "#start_dummy_button",
                                     "text": "Dummy",
@@ -27,7 +27,7 @@ def createStartDummyButton(callback: Callable[[],None]):
 
 def createOtherButton(callback: Callable[[],None]):
 
-    buttons.create_button(callback,
+    adapter.create_button(callback,
                                   config=
                                   { "object_id": "#other_button",
                                     "text": "Hello!",
@@ -36,5 +36,5 @@ def createOtherButton(callback: Callable[[],None]):
 def removeOtherButton():
     
     button = typing.cast(UIButton, findElement("#other_button"))
-    buttons.remove_button(button)
+    adapter.remove_button(button)
     button.kill()

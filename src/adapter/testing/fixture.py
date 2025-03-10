@@ -1,8 +1,8 @@
+from .. import main
 import threading
 import pytest
 from typing import Callable
 import typing
-from .. import main
 import pygame
 
 @pytest.fixture
