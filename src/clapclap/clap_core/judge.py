@@ -1,6 +1,6 @@
 from enum import Enum
-from clap_core.player import Player
-from clap_core.hands import kills
+from clapclap.clap_core.player import Player
+from clapclap.clap_core.hands import kills
 
 class ClapInternalError(Exception):
     pass

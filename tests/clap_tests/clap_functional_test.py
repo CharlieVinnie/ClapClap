@@ -1,4 +1,4 @@
-from clap_core.judge import Judge, GameStatus
+from clapclap.clap_core.judge import Judge, GameStatus
 
 class TestJudge:
 

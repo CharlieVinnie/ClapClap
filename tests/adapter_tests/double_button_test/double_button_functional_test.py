@@ -1,7 +1,7 @@
 import adapter
 import threading
 import pytest
-from ..controller.main_control import gameEntrance
+from .controller.main_control import gameEntrance
 from adapter import pygame_gui_testing # type: ignore
 # from ....testing.buttons import simulate_click_button
 # import typing

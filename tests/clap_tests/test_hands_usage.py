@@ -1,4 +1,4 @@
-from clap_core.player import Player, IllegalHandError
+from clapclap.clap_core.player import Player, IllegalHandError
 import re
 import pytest
 

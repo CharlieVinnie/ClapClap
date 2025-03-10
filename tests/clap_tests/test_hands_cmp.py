@@ -1,4 +1,4 @@
-from clap_core.hands import HANDS, kills
+from clapclap.clap_core.hands import HANDS, kills
 
 class TestComparingHands:
 
