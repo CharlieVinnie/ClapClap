@@ -11,26 +11,22 @@ SCREEN_HEIGHT = 600
 manager: pygame_gui.UIManager|None = None
 screen = None
 
-started_condition = threading.Condition()
+started_event = threading.Event()
 
 def start(init_function: Callable[[],None]):
     global manager, screen, started_condition
     
-    with started_condition:
-        try:
+    pygame.init()
 
-            pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 
-            screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+    pygame.display.set_caption("dummy qwq")
 
-            pygame.display.set_caption("dummy qwq")
+    manager = pygame_gui.UIManager((SCREEN_WIDTH,SCREEN_HEIGHT))
 
-            manager = pygame_gui.UIManager((SCREEN_WIDTH,SCREEN_HEIGHT))
+    init_function()
 
-            init_function()
-
-        finally:
-            started_condition.notify_all()
+    started_event.set()
 
     clock = pygame.time.Clock()
     running = True

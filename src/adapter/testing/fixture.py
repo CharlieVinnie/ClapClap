@@ -12,8 +12,7 @@ def pygame_gui_testing(request: pytest.FixtureRequest):
     main_thread = threading.Thread(target=entrance)
     main_thread.start()
 
-    with main.started_condition:
-        main.started_condition.wait_for(lambda: main.manager is not None)
+    main.started_event.wait()
 
     yield main_thread
 
