@@ -12,6 +12,7 @@ manager: pygame_gui.UIManager|None = None
 screen = None
 
 started_event = threading.Event()
+main_loop_event = threading.Event()
 
 def start(init_function: Callable[[],None]):
     global manager, screen, started_condition
@@ -33,6 +34,8 @@ def start(init_function: Callable[[],None]):
 
     while running:
 
+        main_loop_event.clear()
+
         time_delta = clock.tick(60) / 1000.0
 
         for event in pygame.event.get():
@@ -48,5 +51,7 @@ def start(init_function: Callable[[],None]):
         manager.draw_ui(screen)
 
         pygame.display.flip()
+
+        main_loop_event.set()
 
     pygame.quit()
