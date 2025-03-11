@@ -18,7 +18,6 @@ def remove_button(button: UIButton):
 
 
 def process_event(event: Event):
-
     if event.type == pygame_gui.UI_BUTTON_PRESSED:
         button = event.ui_element
 

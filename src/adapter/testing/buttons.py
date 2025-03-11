@@ -3,7 +3,6 @@ import pygame
 import pygame_gui
 
 def simulate_click_button(button: UIButton):
-    event = pygame.event.Event(pygame.USEREVENT,
-                      {"user_type": pygame_gui.UI_BUTTON_PRESSED,
-                       "ui_element": button,})
+    event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
+                      {"ui_element": button,})
     pygame.event.post(event)
