@@ -15,4 +15,4 @@ def postEvent(type: int, dict: dict[str, Any], callback: Callable[[],None]|None 
 
     pygame.event.post(pygame.event.Event(type,dict))
 
-    wakeup_event.wait()
+    assert wakeup_event.wait(timeout=2)

@@ -1,4 +1,4 @@
-from .. import main
+import adapter
 import threading
 import pytest
 from typing import Callable
@@ -9,10 +9,12 @@ import pygame
 def pygame_gui_testing(request: pytest.FixtureRequest):
     entrance = typing.cast(Callable[[],None], request.param)
 
+    adapter.reset()
+
     main_thread = threading.Thread(target=entrance)
     main_thread.start()
 
-    main.started_event.wait()
+    adapter.main.started_event.wait()
 
     yield main_thread
 

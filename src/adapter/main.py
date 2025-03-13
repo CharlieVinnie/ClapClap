@@ -13,6 +13,12 @@ screen = None
 
 started_event = threading.Event()
 
+def reset():
+    global manager, screen, started_event
+    manager = None
+    screen = None
+    started_event = threading.Event()
+
 def start(init_function: Callable[[],None]):
     global manager, screen
     
