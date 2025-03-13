@@ -7,13 +7,8 @@ import logging
 
 @pytest.mark.parametrize("pygame_gui_testing", [gameEntrance], indirect=True)
 def test_single_button(caplog: pytest.LogCaptureFixture, pygame_gui_testing: threading.Thread):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    with caplog.at_level(logging.INFO):
+        button = adapter.findButton("#start_dummy_button")
+        adapter.simulate_click_button(button)
 
-    button = adapter.findButton("#start_dummy_button")
-    adapter.simulate_click_button(button)
-
-    for handler in logger.handlers:
-        handler.flush()
-    
-    assert "hello" in caplog.text
+    assert caplog.text.count("hello") == 1
