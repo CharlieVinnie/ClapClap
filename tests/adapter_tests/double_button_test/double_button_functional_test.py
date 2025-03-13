@@ -23,18 +23,15 @@ def test_double_button(caplog: pytest.LogCaptureFixture, pygame_gui_testing: thr
 
     assert caplog.text.count("hello") == 2
 
-    # import time
-    # time.sleep(1)
+    adapter.simulate_click_button(dummy_button)
 
-    # adapter.simulate_click_button(dummy_button)
-
-    # with pytest.raises(adapter.ButtonNotFoundError):
-    #     adapter.findElement("#other_button")
+    with pytest.raises(adapter.ButtonNotFoundError):
+        adapter.findElement("#other_button")
     
-    # adapter.simulate_click_button(dummy_button)
+    adapter.simulate_click_button(dummy_button)
 
-    # other_button = adapter.findButton("#other_button")
+    other_button = adapter.findButton("#other_button")
 
-    # adapter.simulate_click_button(other_button)
+    adapter.simulate_click_button(other_button)
 
-    # assert caplog.text.count("hello") == 3
+    assert caplog.text.count("hello") == 3

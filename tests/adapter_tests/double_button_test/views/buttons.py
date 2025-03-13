@@ -9,8 +9,8 @@ class ButtonNotFoundError(Exception): pass
 
 def findElement(name: str):
     try:
-        assert adapter.manager is not None
-        container = typing.cast(UIContainer, adapter.manager.get_root_container())
+        assert adapter.main.manager is not None
+        container = typing.cast(UIContainer, adapter.main.manager.get_root_container())
         element = next( elem for elem in container.elements if elem.get_object_ids()[0] == name )
         return element
     except StopIteration:
