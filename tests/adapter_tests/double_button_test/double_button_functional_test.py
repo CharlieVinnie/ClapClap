@@ -25,7 +25,7 @@ def test_double_button(caplog: pytest.LogCaptureFixture, pygame_gui_testing: thr
 
     adapter.simulate_click_button(dummy_button)
 
-    with pytest.raises(adapter.ButtonNotFoundError):
+    with pytest.raises(adapter.ElementNotFoundError):
         adapter.findElement("#other_button")
     
     adapter.simulate_click_button(dummy_button)

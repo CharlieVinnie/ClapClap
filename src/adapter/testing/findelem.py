@@ -3,7 +3,7 @@ from pygame_gui.core import UIContainer
 from pygame_gui.elements import UIButton, UITextBox
 import typing
 
-class ButtonNotFoundError(Exception): pass
+class ElementNotFoundError(Exception): pass
 
 def findElement(name: str):
     try:
@@ -12,7 +12,7 @@ def findElement(name: str):
         element = next( elem for elem in container.elements if elem.get_object_ids()[0] == name )
         return element
     except StopIteration:
-        raise ButtonNotFoundError(f"element \"{name}\" not found")
+        raise ElementNotFoundError(f"element \"{name}\" not found")
 
 def findButton(name: str):
     button = findElement(name)
