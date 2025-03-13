@@ -1,6 +1,6 @@
 from .. import main
 from pygame_gui.core import UIContainer
-from pygame_gui.elements import UIButton
+from pygame_gui.elements import UIButton, UITextBox
 import typing
 
 class ButtonNotFoundError(Exception): pass
@@ -17,3 +17,7 @@ def findElement(name: str):
 def findButton(name: str):
     button = findElement(name)
     return typing.cast(UIButton, button)
+
+def findTextbox(name: str):
+    button = findElement(name)
+    return typing.cast(UITextBox, button)

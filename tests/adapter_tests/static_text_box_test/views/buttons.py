@@ -2,12 +2,12 @@ import adapter
 from typing import Callable
 import pygame
 
-def createStartDummyButton(callback: Callable[[],None]):
+def createTogglerButton(callback: Callable[[],None]):
 
     adapter.create_button(callback,
                           config=
                           {
-                              "object_id": "#start_dummy_button",
-                              "text": "Dummy",
+                              "object_id": "#toggler_button",
+                              "text": "Toggle Me",
                               "relative_rect": pygame.Rect((100,100),(200,50)),
                           })

@@ -1,20 +1,8 @@
 import adapter
-import typing
 from typing import Callable
 import pygame
-from pygame_gui.core import UIContainer
-from pygame_gui.elements import UIButton
 
 class ButtonNotFoundError(Exception): pass
-
-def findElement(name: str):
-    try:
-        assert adapter.main.manager is not None
-        container = typing.cast(UIContainer, adapter.main.manager.get_root_container())
-        element = next( elem for elem in container.elements if elem.get_object_ids()[0] == name )
-        return element
-    except StopIteration:
-        raise ButtonNotFoundError(f"element \"{name}\" not found")
 
 def createStartDummyButton(callback: Callable[[],None]):
 
@@ -35,6 +23,6 @@ def createOtherButton(callback: Callable[[],None]):
 
 def removeOtherButton():
     
-    button = typing.cast(UIButton, findElement("#other_button"))
+    button = adapter.findButton("#other_button")
     adapter.remove_button(button)
     button.kill()
