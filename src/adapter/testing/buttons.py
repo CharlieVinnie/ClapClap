@@ -1,8 +1,9 @@
+import adapter
+import adapter.testing
+import adapter.testing.events
 from pygame_gui.elements import UIButton
-import pygame
 import pygame_gui
 
 def simulate_click_button(button: UIButton):
-    event = pygame.event.Event(pygame_gui.UI_BUTTON_PRESSED,
-                      {"ui_element": button,})
-    pygame.event.post(event)
+    adapter.testing.events.postEvent(pygame_gui.UI_BUTTON_PRESSED,
+                                     {"ui_element": button,})

@@ -12,10 +12,9 @@ manager: pygame_gui.UIManager|None = None
 screen = None
 
 started_event = threading.Event()
-main_loop_event = threading.Event()
 
 def start(init_function: Callable[[],None]):
-    global manager, screen, started_condition
+    global manager, screen
     
     pygame.init()
 
@@ -34,9 +33,9 @@ def start(init_function: Callable[[],None]):
 
     while running:
 
-        main_loop_event.clear()
-
         time_delta = clock.tick(60) / 1000.0
+
+        post_process_callback_list: list[Callable[[],None]] = []
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -46,12 +45,16 @@ def start(init_function: Callable[[],None]):
 
             buttons.process_event(event)
 
+            if hasattr(event, "post_process_callback"):
+                post_process_callback_list.append(event.post_process_callback)
+
         manager.update(time_delta)
         screen.fill((0,0,0))
         manager.draw_ui(screen)
 
         pygame.display.flip()
 
-        main_loop_event.set()
+        for callback in post_process_callback_list:
+            callback()
 
     pygame.quit()

@@ -13,8 +13,6 @@ def test_single_button(caplog: pytest.LogCaptureFixture, pygame_gui_testing: thr
     button = adapter.findButton("#start_dummy_button")
     adapter.simulate_click_button(button)
 
-    adapter.main.main_loop_event.wait()
-
     for handler in logger.handlers:
         handler.flush()
     
