@@ -19,3 +19,5 @@ def pygame_gui_testing(request: pytest.FixtureRequest):
     yield main_thread
 
     pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+    main_thread.join()

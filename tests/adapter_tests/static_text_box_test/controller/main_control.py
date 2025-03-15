@@ -8,8 +8,10 @@ def toggleTextBox():
 
     if not textbox_on:
         textboxes.createFirstTextbox()
+        textbox_on = True
     else:
         textboxes.removeFirstTextbox()
+        textbox_on = False
 
 def gameEntrance():
     def init():

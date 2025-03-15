@@ -11,4 +11,13 @@ def test_single_button(pygame_gui_testing: threading.Thread):
 
     adapter.simulate_click_button(button)
 
-    adapter.findElement("#first_text_box")
+    adapter.findTextbox("#first_text_box")
+
+    adapter.simulate_click_button(button)
+
+    with pytest.raises(adapter.ElementNotFoundError):
+        adapter.findTextbox("#first_text_box")
+
+    adapter.simulate_click_button(button)
+
+    adapter.findTextbox("#first_text_box")
