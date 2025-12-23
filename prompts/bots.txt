@@ -1,0 +1,1 @@
+For each round, plays Qi with p probability, plays Shield with q probability, and plays the maximum possible attack with 1-p-q probability.

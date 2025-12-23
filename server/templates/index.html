@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClapClap: Human vs AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #212529; color: #f8f9fa; font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif; }
+        .card { background-color: #343a40; border-color: #495057; }
+        .resource-box { font-size: 1.1rem; text-align: center; padding: 10px; margin: 2px; border-radius: 8px; background: #495057; min-height: 90px; }
+        .resource-name { font-size: 0.9rem; color: #adb5bd; }
+        .resource-val { font-size: 1.8rem; font-weight: bold; }
+        .move-btn { margin: 5px; min-width: 60px; font-weight: bold; position: relative; }
+        .key-hint { position: absolute; top: -8px; right: -8px; background: #ffc107; color: #000; font-size: 0.7rem; padding: 1px 4px; border-radius: 4px; }
+        .log-entry { border-bottom: 1px solid #495057; padding: 5px; }
+        .log-entry:last-child { border-bottom: none; }
+        .victory { color: #28a745; font-weight: bold; }
+        .defeat { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">ClapClap Arena</h1>
+    
+    <div class="row mb-4">
+        <!-- Agent -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center bg-danger text-white">
+                    <h3>🤖 AI Agent</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">气 (Qi)</div><div class="resource-val" id="agent-qi">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">盾 (Shield)</div><div class="resource-val" id="agent-shield">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">火 (Spark)</div><div class="resource-val" id="agent-spark">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">电 (Batt)</div><div class="resource-val" id="agent-battery">0</div></div></div>
+                        <!-- Duck is hidden/less important or we fit it in? Env has Duck. Let's show it. -->
+                        <div class="col-12 mt-2"><div class="resource-box" style="min-height: 50px; display:flex; align-items:center; justify-content:center;">闪: <span id="agent-duck" class="ms-2 fw-bold">0</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Human -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center bg-success text-white">
+                    <h3>👤 You</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">气 (Qi)</div><div class="resource-val" id="human-qi">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">盾 (Shield)</div><div class="resource-val" id="human-shield">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">火 (Spark)</div><div class="resource-val" id="human-spark">0</div></div></div>
+                        <div class="col-3"><div class="resource-box"><div class="resource-name">电 (Batt)</div><div class="resource-val" id="human-battery">0</div></div></div>
+                        <div class="col-12 mt-2"><div class="resource-box" style="min-height: 50px; display:flex; align-items:center; justify-content:center;">闪: <span id="human-duck" class="ms-2 fw-bold">0</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Controls -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h4 class="mb-3">Action (Keyboard Enabled)</h4>
+            <div id="controls-area">
+                <!-- Buttons injected by JS -->
+            </div>
+            <div id="game-over-msg" class="mt-3 h3" style="display:none;"></div>
+            <button class="btn btn-warning mt-3" onclick="resetGame()">Restart (Space)</button>
+        </div>
+    </div>
+    
+    <!-- Log -->
+    <div class="card">
+        <div class="card-header">Game Log</div>
+        <div class="card-body" id="game-log" style="max-height: 300px; overflow-y: auto;">
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    // Move Definitions with Chinese mapping and Keys
+    // Keys: Q-Qi, W-Shield, E-Shan, R-Chi
+    // Attacks: A, S, D, F, Z, X, C
+    const MOVES_CONFIG = [
+        { id: "QI", name: "气", key: "q" },
+        { id: "SHIELD", name: "盾", key: "w" },
+        { id: "SHAN", name: "闪", key: "e" },
+        { id: "CHI", name: "吃", key: "r" },
+        
+        { id: "GI", name: "gi", key: "a" },
+        { id: "PO", name: "破", key: "s" },
+        { id: "LENG_FENG", name: "冷风", key: "d" },
+        { id: "RU_LAI", name: "如来", key: "f" },
+        { id: "HEI_DONG", name: "黑洞", key: "g" },
+        
+        { id: "XIAO_HUO", name: "小火", key: "z" },
+        { id: "SHAN_DIAN", name: "闪电", key: "x" },
+        { id: "DA_HUO", name: "大火", key: "c" },
+        { id: "SHINING", name: "Shining", key: "v" },
+    ];
+    
+    // Map ID to Config
+    const MOVES_MAP = {};
+    const KEY_MAP = {};
+    MOVES_CONFIG.forEach(m => {
+        MOVES_MAP[m.id] = m;
+        KEY_MAP[m.key] = m.id;
+    });
+
+    let isProcessing = false;
+
+    async function resetGame() {
+        const res = await fetch('/reset', { method: 'POST' });
+        const data = await res.json();
+        render(data);
+    }
+    
+    async function sendMove(move) {
+        if (isProcessing) return;
+        isProcessing = true;
+        try {
+            const res = await fetch('/step', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ move: move })
+            });
+            const data = await res.json();
+            render(data);
+        } finally {
+            isProcessing = false;
+        }
+    }
+    
+    function render(state) {
+        // Resources
+        ['qi', 'shield', 'spark', 'duck', 'battery'].forEach(r => {
+            const agentEl = document.getElementById(`agent-${r}`);
+            const humanEl = document.getElementById(`human-${r}`);
+            if (agentEl) agentEl.innerText = state.agent[r];
+            if (humanEl) humanEl.innerText = state.human[r];
+        });
+        
+        // Controls
+        const controls = document.getElementById('controls-area');
+        controls.innerHTML = '';
+        
+        if (state.done) {
+            // Game Over
+            const winner = state.history[state.history.length-1].winner;
+            const msg = document.getElementById('game-over-msg');
+            msg.style.display = 'block';
+            if (winner === 2) { 
+                msg.innerHTML = '<span class="victory">VICTORY! You defeated the AI!</span>';
+            } else if (winner === 1) { 
+                msg.innerHTML = '<span class="defeat">DEFEAT! The AI crushed you!</span>';
+            } else {
+                msg.innerText = "DRAW!";
+            }
+        } else {
+            document.getElementById('game-over-msg').style.display = 'none';
+            
+            // Render Buttons sorted by layout logic or just list?
+            // Use MOVES_CONFIG order
+            MOVES_CONFIG.forEach(m => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-light move-btn';
+                btn.innerHTML = `${m.name} <span class="key-hint">${m.key.toUpperCase()}</span>`;
+                
+                if (state.available_moves.includes(m.id)) {
+                    btn.onclick = () => sendMove(m.id);
+                } else {
+                    btn.disabled = true;
+                    btn.className += ' disabled';
+                    btn.style.opacity = '0.3';
+                }
+                controls.appendChild(btn);
+            });
+        }
+        
+        // Log
+        const log = document.getElementById('game-log');
+        log.innerHTML = '';
+        [...state.history].reverse().forEach(h => {
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            
+            // Translate move values if needed (the server sends the char value, which is already Chinese usually)
+            // But let's check
+            div.innerHTML = `<strong>R${h.round}:</strong> 
+                             AI: <span class="text-danger fw-bold">${h.agent_move}</span> | 
+                             You: <span class="text-success fw-bold">${h.human_move}</span>`;
+            log.appendChild(div);
+        });
+    }
+    
+    // Keyboard Listener
+    document.addEventListener('keydown', (e) => {
+        if (e.repeat) return;
+        const key = e.key.toLowerCase();
+        
+        if (key === ' ') {
+            resetGame();
+            return;
+        }
+        
+        if (KEY_MAP[key]) {
+            const moveId = KEY_MAP[key];
+            // Check if available?
+            // We can try to send it, backend will reject or valid.
+            // But better UI experience: check button state
+            // But we can just try.
+            sendMove(moveId);
+        }
+    });
+    
+    // Init
+    resetGame();
+</script>
+
+</body>
+</html>

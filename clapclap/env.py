@@ -9,15 +9,18 @@ from .constants import Move, Resource, ATTACK_POWER
 class ClapClapEnv(ParallelEnv):
     metadata = {"render_modes": ["human"], "name": "clapclap_v0"}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, max_cycles=100):
         self.possible_agents = ["player_0", "player_1"]
         self.render_mode = render_mode
         self.state_manager = ClapClapState()
+        self.max_cycles = max_cycles
         
-        # Observation: [Qi, Shield, Spark, Battery, Duck] x 2 players
-        # + Round Num?
+        # Observation: Dict with 'observations' and 'action_mask'
         self.observation_spaces = {
-            agent: spaces.Box(low=0, high=100, shape=(10,), dtype=np.int32)
+            agent: spaces.Dict({
+                "observations": spaces.Box(low=-100, high=100, shape=(10,), dtype=np.float32),
+                "action_mask": spaces.Box(0, 1, shape=(len(Move),), dtype=np.float32)
+            })
             for agent in self.possible_agents
         }
         
@@ -32,7 +35,8 @@ class ClapClapEnv(ParallelEnv):
     def reset(self, seed=None, options=None):
         self.agents = self.possible_agents[:]
         self.state_manager = ClapClapState()
-        return self._get_obs(), {}
+        infos = {agent: {} for agent in self.agents}
+        return self._get_obs(), infos
 
     def step(self, actions):
         # Extract moves
@@ -50,24 +54,45 @@ class ClapClapEnv(ParallelEnv):
         # Check termination
         terminations = {agent: False for agent in self.agents}
         truncations = {agent: False for agent in self.agents}
-        rewards = {agent: 0 for agent in self.agents}
+        rewards = {agent: 0.0 for agent in self.agents}
         
+        # Reward Shaping: Economic Advantage
+        # Reward += 0.01 * (My_Qi - Opponent_Qi)
+        # Reward += 0.05 * (My_Duck - Opponent_Duck)
+        
+        # P0 Rewards
+        p1 = self.state_manager.p1
+        p2 = self.state_manager.p2
+        
+        rewards["player_0"] += 0.001 * (p1.resources[Resource.QI] - p2.resources[Resource.QI])
+        rewards["player_0"] += 0.005 * (p1.resources[Resource.DUCK] - p2.resources[Resource.DUCK])
+        
+        # P1 Rewards (Symmetric)
+        rewards["player_1"] += 0.001 * (p2.resources[Resource.QI] - p1.resources[Resource.QI])
+        rewards["player_1"] += 0.005 * (p2.resources[Resource.DUCK] - p1.resources[Resource.DUCK])
+        
+        # Step Penalty (Encourage Speed / Aggression)
+        rewards["player_0"] -= 0.001
+        rewards["player_1"] -= 0.001
+                
         if self.state_manager.winner is not None:
             # Game Over
             terminations = {agent: True for agent in self.agents}
             if self.state_manager.winner == 1:
-                rewards["player_0"] = 1
-                rewards["player_1"] = -1
+                rewards["player_0"] += 1.0
+                rewards["player_1"] -= 1.0
+                infos["player_0"]["is_success"] = True
+                infos["player_1"]["is_success"] = False
             elif self.state_manager.winner == 2:
-                rewards["player_0"] = -1
-                rewards["player_1"] = 1
+                rewards["player_0"] -= 1.0
+                rewards["player_1"] += 1.0
+                infos["player_0"]["is_success"] = False
+                infos["player_1"]["is_success"] = True
             else:
-                # Draw (winner=0)
-                rewards["player_0"] = 0
-                rewards["player_1"] = 0
+                pass # Draw
                 
-        # Optional: Truncate if too many rounds to prevent infinite loops?
-        if self.state_manager.round_num > 100:
+        # Truncate if too many rounds
+        if self.state_manager.round_num >= self.max_cycles:
              truncations = {agent: True for agent in self.agents}
 
         return observations, rewards, terminations, truncations, infos
@@ -86,20 +111,33 @@ class ClapClapEnv(ParallelEnv):
         p1_vec = encode_player(self.state_manager.p1)
         p2_vec = encode_player(self.state_manager.p2)
         
-        # Relative obs? Or Absolute?
-        # Player 0 sees P1 then P2
-        # Player 1 sees P2 then P1 (usually symmetric view preferred)
+        obs_0 = np.array(p1_vec + p2_vec, dtype=np.float32)
+        obs_1 = np.array(p2_vec + p1_vec, dtype=np.float32)
         
-        obs_0 = np.array(p1_vec + p2_vec, dtype=np.int32)
-        obs_1 = np.array(p2_vec + p1_vec, dtype=np.int32)
+        # Get masks
+        masks = self.action_mask()
         
-        return {"player_0": obs_0, "player_1": obs_1}
+        return {
+            "player_0": {
+                "observations": obs_0,
+                "action_mask": np.array(masks["player_0"], dtype=np.float32)
+            },
+            "player_1": {
+                "observations": obs_1,
+                "action_mask": np.array(masks["player_1"], dtype=np.float32)
+            }
+        }
 
     def action_mask(self):
         # Return dict of valid action masks
         masks = {}
         for i, agent in enumerate(self.agents):
-            p_state = self.state_manager.p1 if i == 0 else self.state_manager.p2
-            mask = [p_state.can_afford(m) for m in self.move_list]
+            p_curr = self.state_manager.p1 if i == 0 else self.state_manager.p2
+            p_opp = self.state_manager.p2 if i == 0 else self.state_manager.p1
+            
+            mask = [p_curr.can_afford(m) for m in self.move_list]
+            
+            # Removed Heuristic: Let the agent learn strategy. Only mask illegal moves.
+            
             masks[agent] = mask
         return masks

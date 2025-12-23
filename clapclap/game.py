@@ -59,10 +59,27 @@ class ClapClapState:
 class GameEngine:
     @staticmethod
     def resolve_round(state: ClapClapState, move1: Move, move2: Move) -> ClapClapState:
-        # 1. Check validity (optional, but good for safety)
-        # Assuming inputs are valid for now to keep it pure logic.
+        # 1. Check validity
+        p1_valid = state.p1.can_afford(move1)
+        p2_valid = state.p2.can_afford(move2)
         
-        # 2. Consume resources
+        if not p1_valid and not p2_valid:
+            # Both played illegal moves -> Draw/Mutual Loss
+            state.winner = 0
+            state.round_num += 1
+            return state
+        if not p1_valid:
+            # P1 played illegal -> P2 wins
+            state.winner = 2
+            state.round_num += 1
+            return state
+        if not p2_valid:
+            # P2 played illegal -> P1 wins
+            state.winner = 1
+            state.round_num += 1
+            return state
+        
+        # 2. Consume resources (Both valid now)
         state.p1.consume(move1)
         state.p2.consume(move2)
         

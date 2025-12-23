@@ -1,0 +1,15 @@
+# Python / Environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Legacy / RLLib results
+ray_results/
+league_snapshots/
+
+# Stable Baselines 3 Results
+# Ignore everything (logs, league checkpoints, monitor.csv)
+sb3_results/*
+# Except the final trained model
+!sb3_results/final_model.zip
