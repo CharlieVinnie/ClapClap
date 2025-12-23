@@ -1,0 +1,100 @@
+This game is a complex variant of the playground game "Charge" (also known as "007" or "Shotgun"). Because it features simultaneous moves and cyclical counter-strategies (like Rock-Paper-Scissors), standard Reinforcement Learning (RL) agents often fall into the trap you described: overly defensive "Nash Equilibrium" behaviors where they try to survive rather than win, especially in the early game.
+
+Here is a breakdown of the right algorithms, tools, and specific optimizations to fix the passive behavior.
+
+### 1. The Diagnosis: Why is your model passive?
+
+Your model plays `闪` (Flash) or `盾` (Shield) on Turn 1 because of a **local optimum** in its learning process.
+
+* **The "Survival" Trap:** If the AI is penalized heavily for losing but only lightly rewarded for winning (or if winning takes many steps), it learns that `闪` is the safest way to avoid negative rewards.
+* **Blindness to Threat:** On Turn 1, the opponent has 0 resources. They *cannot* attack. Playing `闪` wastes a resource (Duck) for no reason. The AI likely does not understand that `Opponent Resources == 0` means `Threat == 0`.
+
+---
+
+### 2. Recommended Algorithms
+
+For simultaneous-move games like ClapClap, standard Q-Learning (DQN) often fails because it assumes a static environment. You need algorithms designed for **Game Theory** and **Nash Equilibria**.
+
+#### **Choice A: Deep CFR (Counterfactual Regret Minimization) - *Highly Recommended***
+
+CFR is the gold standard for poker and simultaneous games.
+
+* **Why:** Instead of learning "Action A is good," it learns "How much did I regret *not* playing Action A?"
+* **Effect:** It naturally handles the Rock-Paper-Scissors cycles (e.g., `吃` > `闪电` > `gi` > `吃`). It will mathematically converge to a strategy that exploits passive opponents.
+
+#### **Choice B: PPO with Self-Play (League Training)**
+
+If you prefer standard Deep RL, you must use **Proximal Policy Optimization (PPO)** combined with a **Self-Play League**.
+
+* **Why:** You train the agent against past versions of itself.
+* **The Fix:** If the Current Agent starts playing `闪` passively, a Past Version that plays `气` (Charge) will eventually gain a resource advantage and crush it. This forces the Current Agent to stop being passive to survive.
+
+---
+
+### 3. Best Python Packages
+
+#### **1. OpenSpiel (by DeepMind)**
+
+This is the single best library for this specific type of game. It is designed for game theory and simultaneous moves.
+
+* **Features:** Built-in implementations of CFR, Deep CFR, and AlphaZero.
+* **Why use it:** It handles the simultaneous step logic naturally (unlike standard Gym environments which are turn-based).
+
+#### **2. Ray RLLib**
+
+If you want to use PPO/Self-Play.
+
+* **Features:** Excellent support for "League Training" (training against a pool of past agents).
+* **Why use it:** Industry standard for scaling RL.
+
+#### **3. PettingZoo**
+
+This is the standard "Gym" for multi-agent systems. Use this to define your environment so it works with other libraries.
+
+---
+
+### 4. Optimizations to Stop "Timid" Play
+
+To stop the model from spamming `闪` and `盾` at the start, implement these specific fixes:
+
+#### **A. Strict Action Masking (Crucial)**
+
+The agent should not be allowed to output a move it cannot afford. However, you should also mask moves that are **logically wasteful** during early training.
+
+* **Implementation:** In your environment's `legal_actions` function:
+* If `Opponent_Qi == 0` AND `Opponent_Shield == 0` (Opponent cannot attack):
+* **DISABLE** `闪` (Flash).
+* **DISABLE** `盾` (Shield) (Optional, but encourages charging).
+
+
+
+
+* **Result:** This forces the AI to play `气` (Charge) on Turn 1, breaking the passive loop immediately.
+
+#### **B. "Resource Lead" Reward Shaping**
+
+Standard RL gives +1 for Win, -1 for Loss. This is too sparse. Add a dense reward for **Economic Advantage**:
+
+* `Reward += 0.1 * (My_Qi - Opponent_Qi)`
+* `Reward += 0.2 * (My_Duck - Opponent_Duck)`
+* **Effect:** The AI learns that wasting a Duck on Turn 1 (going down to 1 while opponent stays at 2) is a "losing" move, even if the game hasn't ended yet.
+
+#### **C. The "Berserker" Opponent**
+
+Do not just train against a copy of itself (which is also timid). Train against a scripted **"Berserker Bot"** for the first 1000 episodes.
+
+* **Berserker Strategy:** Always plays `气` until it has enough for `gi` or `破`, then attacks immediately.
+* **Effect:** If your model plays `闪` (Flash) repeatedly against a Berserker, the Berserker will just gather 10 Qi and hit it with a `黑洞` (Black Hole). The model will quickly learn that "stalling" leads to death against an efficient killer.
+
+#### **D. State Representation**
+
+Ensure your input vector to the neural network explicitly calculates the "Lethality" of the opponent.
+
+* Bad Input: `[My_Qi, Opp_Qi, My_Shield, ...]`
+* Good Input: `[My_Qi, Opp_Qi, ..., Can_Opponent_Kill_Me (Boolean), Max_Opponent_Damage_Next_Turn]`
+
+### Summary Next Steps
+
+1. **Environment:** Wrap your game logic in **PettingZoo** (AEC or Parallel API).
+2. **Library:** Install **OpenSpiel**.
+3. **Quick Fix:** Hard-code a rule in the environment: "If Opponent Threat is 0, `闪` is an illegal move." Train with this for 100 epochs, then remove the rule. The model will have learned the value of early aggression.

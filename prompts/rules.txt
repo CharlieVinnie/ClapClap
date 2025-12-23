@@ -1,0 +1,51 @@
+I have a game called "ClapClap". The rules are as follows:
+
+1. The game is played between two players.
+
+2. The game is round-based, with two players playing a hand simultaneously in each round.
+
+3. After each round, whether one of the player wins or the game continues is based only on the comparison of the hands played by the players.
+
+4. The game ends when one of the player wins the game.
+
+5. All the possible hands are: ”气“，“盾”，“gi”，“破”，“冷风”，“如来”，“黑洞”，“小火”，“闪电”，“大火”，“Shining”，“闪”，“吃”，“双吃”，“十字防”。
+
+6. Each player has 5 types resources: qi, shield, spark, battery, and duck. Initially duck=2 and others are all 0.
+
+7. 气 盾 can be played at all times without resource comsumption. 气 adds 1 qi, 盾 adds one shield.
+
+8. gi requires 1 qi, 破 requires 2 qi, 冷风 requires 3 qi, 如来 requires 5 qi, 黑洞 requires 8 qi。
+
+9. 小火 requires 2 shield, 闪电 requires 3 shield, 大火 requires 4 shield, Shining requires 6 shield.
+
+10. 闪 requires 1 duck, 吃 requires 1 qi, 双吃 requires 2 qi, 十字防 requires 2 qi。
+
+10. The attack hands are ordered as follows: 黑洞 > Shining = 如来 > 大火 = 冷风 > 闪电 = 破 > 小火 > gi。 
+
+11. When a stronger attack hand meets a weaker attack hand, the stronger one wins. If the strength of two attack hands are equal, the game continues.
+
+12. All attack hands can kill 气。Only those stronger or equal to 破 can kill 盾。Those stronger or equal to 如来 can kill 十字防。
+
+13. “闪” ducks all attacks unconditionally.
+
+14. “吃” kills 破, "eats" 闪电，but is killed by all other attack hands.
+
+15. “双吃” kills 破, "eats" 闪电 and Shining。
+
+16. Each 小火 gathers 1 spark, Each 闪电 gathers 1 battery. 2 sparks can be used to play 大火 (instead of 4 shield), 2 batteries can be used to play Shining (instead of 6 shield).
+
+17. An exception to 16 is that if a 闪电 is "eaten" by a 吃，then no batteries are gathered.
+
+
+Some caveats:
+
+“吃” "eats" 闪电 with the game continuing.
+
+盾 is different from 十字防。冷风 kills 盾 because 冷风 > 破, which is the minimal undefensable hand for 盾。
+
+吃 does NOT defeat 闪电, the game continues instead. Same for 双吃 and 闪电、 双吃 with Shining。 
+
+Use sparks primarily instead of shields when playing 大火。Same for Shining.
+
+All attacks besides 破 and 闪电 and Shining kills 双吃。
+
