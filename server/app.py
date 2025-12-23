@@ -5,7 +5,7 @@ import numpy as np
 import os
 from clapclap.env import ClapClapEnv
 from clapclap.constants import Resource, Move
-from training.sb3_wrapper import ClapClapSB3Wrapper # For observation alignment if needed, but we use raw env
+
 
 import uuid
 from flask import Flask, render_template, jsonify, request, session
