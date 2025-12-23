@@ -7,23 +7,28 @@ from clapclap.env import ClapClapEnv
 from clapclap.constants import Resource, Move
 from training.sb3_wrapper import ClapClapSB3Wrapper # For observation alignment if needed, but we use raw env
 
-app = Flask(__name__)
+import uuid
+from flask import Flask, render_template, jsonify, request, session
 
-# Global State
+# ... imports ...
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24) # Standard secure key generation
+
+# Global Store for Games (InMemory)
+# Key: session_id (str), Value: GameSession instance
+GAMES = {}
+
 class GameSession:
+    # ... (Keep existing logic, but remove global instantiation) ...
     def __init__(self):
         self.env = ClapClapEnv(max_cycles=100)
-        # We need the Wrapper just to get the Observation Space correctly aligned if we used it for training?
-        # The Wrapper adds 'action_mask'Key to the Dict entry.
-        # But ClapClapEnv native now provides that too (we added it).
-        # Let's check env.py... Yes, we modified ClapClapEnv to return Dict with action_mask.
-        # So raw env is fine.
-        
         self.model = MaskablePPO.load("sb3_results/final_model", device="cpu")
         self.obs = None
         self.done = False
         self.history = []
-        
+        self.reset() # Auto-reset on init
+
     def reset(self):
         self.obs, _ = self.env.reset()
         self.done = False
@@ -31,23 +36,18 @@ class GameSession:
         return self.get_state()
         
     def step(self, human_move_name):
+        # ... (Keep existing logic) ...
         if self.done: return self.get_state()
         
         # 1. Human Action (Player 1)
-        # Map string to Enum index
         try:
-            # Match by value (character) or name?
-            # User will likely send "Qi" or "Shield" (names)
             human_move = Move[human_move_name.upper()]
         except KeyError:
-            # Maybe they sent the character value?
-            # Let's assume Name for now.
             return {"error": "Invalid Move"}
             
         human_action_idx = list(Move).index(human_move)
         
         # 2. Agent Action (Player 0)
-        # Agent sees player_0 obs
         agent_obs = self.obs["player_0"]
         agent_mask = agent_obs["action_mask"]
         
@@ -66,16 +66,12 @@ class GameSession:
         self.obs, rewards, terms, truncs, infos = self.env.step(actions)
         
         # History
-        # Record what happened
-        # We need resources BEFORE the step? Or after?
-        # Let's show Resulting state.
-        
         p0_res = self.env.state_manager.p1.resources.copy()
         p1_res = self.env.state_manager.p2.resources.copy()
         
         round_res = {
             "round": self.env.state_manager.round_num,
-            "agent_move": agent_move.value, # Character
+            "agent_move": agent_move.value, 
             "human_move": human_move.value,
             "agent_qi": p0_res[Resource.QI],
             "agent_shield": p0_res[Resource.SHIELD],
@@ -89,14 +85,14 @@ class GameSession:
         return self.get_state()
 
     def get_state(self):
-        # Return current resources for UI
+        # ... (Same as before) ...
+        # Ensure we handle init case where obs might be None if reset wasn't called (but we call it in init now)
+        if self.obs is None: self.reset()
+
         p0 = self.env.state_manager.p1
-        p1 = self.env.state_manager.p2 # Human
+        p1 = self.env.state_manager.p2 
         
-        # Check available moves for Human (Action Mask)
-        # P1 mask
         p1_mask = self.obs["player_1"]["action_mask"]
-        # Convert mask to list of available Move Names
         moves = list(Move)
         available_moves = [m.name for i, m in enumerate(moves) if p1_mask[i] == 1]
         
@@ -120,7 +116,14 @@ class GameSession:
             "available_moves": available_moves
         }
 
-SESSION = GameSession()
+def get_session():
+    if 'uid' not in session:
+        session['uid'] = str(uuid.uuid4())
+    
+    uid = session['uid']
+    if uid not in GAMES:
+        GAMES[uid] = GameSession()
+    return GAMES[uid]
 
 @app.route('/')
 def home():
@@ -128,14 +131,15 @@ def home():
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    return jsonify(SESSION.reset())
+    game = get_session()
+    return jsonify(game.reset())
 
 @app.route('/step', methods=['POST'])
 def step():
     data = request.json
     move = data.get('move')
-    return jsonify(SESSION.step(move))
+    game = get_session()
+    return jsonify(game.step(move))
 
 if __name__ == '__main__':
-    SESSION.reset()
     app.run(host='0.0.0.0', port=5000)
